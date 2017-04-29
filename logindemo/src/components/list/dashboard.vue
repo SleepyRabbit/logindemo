@@ -132,6 +132,7 @@
           this.updateChart(value);
         });
       },
+//      onRefresh是Refresh按钮的响应函数，向服务器发送"rpc_otu_call"RPC指令，获取"uCast.info"信息
       onRefresh: function () {
         if(this.getActiveDev !== null) {
           let ds_rpc_param = {
@@ -167,15 +168,18 @@
       getStat: function () {
           this.onRefresh();
 
+//发送"rpc_otu_call"指令，获取state信息
           let ds_rpc_param = {
             D: Number,  //D字段指示下发设备DID
           };
-          ds_rpc_param.D = this.dev;   // id为字符串，讲其转化成数字
-//          console.log(this.dev);
+          ds_rpc_param.D = this.dev;   // id为字符串，将其转化成数字
           ds.sendRpc('rpc_otu_call', ds_rpc_param, (err, ret) => {
 //            this.info_message = JSON.stringify(ret, null, 2);
             if(err === null) {              // 没有错误
-                if(this.lastStat !== null) {
+              //检查返回的对象中是否有online属性
+              if(ret.hasOwnProperty('online')) {
+                if(ret.online) {                //设备在线
+                  if (this.lastStat !== null) {
                     let upReq = ret.upReq - this.lastStat.upReq;
                     let upNotify = ret.upNotify - this.lastStat.upNotify;
                     let upKplv = ret.upKplv - this.lastStat.upKplv;
@@ -190,10 +194,14 @@
                     this.updateChart(dnFlow);
 //                    console.log(dnFlow);
                     this.lastStat = ret;
+                  }
+                  else {
+                    this.lastStat = ret;
+                  }
                 }
-                else {
-                  this.lastStat = ret;
+                else {                 //设备不在线
                 }
+              }
             }
             else {                      // 出现错误
             }
@@ -202,6 +210,10 @@
       onDevice: function (num, dev) {
         if(this.getActiveDev !== null) {
           ds.unsubscribe(this.getActiveId);    // Unsubscribe active device
+          if(this.timer !== null) {
+              clearInterval(this.timer);
+              this.timer = null;
+          }
         };
         this.setActiveNum(num);
         this.dev = parseInt(dev.id);
@@ -292,6 +304,10 @@
       if(this.getActiveDev !== null) {
 //        console.log(this.getActiveId)
         ds.unsubscribe(this.getActiveId);    // Unsubscribe active device
+        if(this.timer !== null) {
+            clearInterval(this.timer);
+            this.timer = null;
+        }
       }
     },
   }

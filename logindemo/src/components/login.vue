@@ -39,10 +39,10 @@
       return {
 //        username: 'dashboard ',
 //        password: 'ewHrlx74hye',
-        username: 'ws_d1',
-        password: 'thisisatestkey',
-//        username: '',
-//        password: '',
+//        username: 'ws_d1',
+//        password: 'thisisatestkey',
+        username: '',
+        password: '',
       }
     },
     methods: {
